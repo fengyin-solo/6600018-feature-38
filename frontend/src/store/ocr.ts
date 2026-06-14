@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import type { Document, OCRResult, Annotation } from '../types'
 
@@ -69,7 +69,8 @@ export const useOcrStore = defineStore('ocr', () => {
     if (!currentDoc.value) return
     currentDoc.value.annotations.push({
       id: Date.now().toString(),
-      type, bbox, label, content
+      type, bbox, label, content,
+      createdAt: new Date().toISOString()
     })
   }
 
@@ -102,9 +103,33 @@ export const useOcrStore = defineStore('ocr', () => {
     return tei
   }
 
+  const annotationStats = computed(() => {
+    if (!currentDoc.value) return { total: 0, byType: {}, latest: null as Annotation | null }
+    const annotations = currentDoc.value.annotations
+    const byType: Record<string, number> = {}
+    for (const a of annotations) {
+      byType[a.type] = (byType[a.type] || 0) + 1
+    }
+    const latest = annotations.length > 0
+      ? [...annotations].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]
+      : null
+    return { total: annotations.length, byType, latest }
+  })
+
+  function formatTimeAgo(dateStr: string): string {
+    const now = new Date().getTime()
+    const date = new Date(dateStr).getTime()
+    const diff = Math.floor((now - date) / 1000)
+    if (diff < 60) return `${diff} 秒前`
+    if (diff < 3600) return `${Math.floor(diff / 60)} 分钟前`
+    if (diff < 86400) return `${Math.floor(diff / 3600)} 小时前`
+    return `${Math.floor(diff / 86400)} 天前`
+  }
+
   return {
     documents, currentDoc, isLoading, searchQuery, searchResults,
+    annotationStats,
     loadMockDocument, uploadAndOCR, addAnnotation, removeAnnotation,
-    convertVariant, searchInDocuments, exportTEI
+    convertVariant, searchInDocuments, exportTEI, formatTimeAgo
   }
 })

@@ -72,6 +72,32 @@
       </div>
 
       <h3 class="text-amber-300 font-bold text-sm mt-4">标注列表</h3>
+
+      <div v-if="store.currentDoc" class="bg-gray-800 rounded p-3 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs text-gray-400">标注总数</span>
+          <span class="text-lg font-bold text-amber-400">{{ store.annotationStats.total }}</span>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <span v-for="(count, type) in store.annotationStats.byType" :key="type"
+            class="text-xs px-2 py-1 rounded bg-gray-700 text-gray-300">
+            {{ type }}: {{ count }}
+          </span>
+        </div>
+        <div v-if="store.annotationStats.latest" class="border-t border-gray-700 pt-2 mt-2">
+          <div class="text-xs text-gray-400 mb-1">最近新增</div>
+          <div class="bg-green-900/30 border border-green-800 rounded p-2">
+            <div class="text-xs text-green-400 font-medium">
+              [{{ store.annotationStats.latest.type }}] {{ store.annotationStats.latest.label }}
+            </div>
+            <div class="text-xs text-gray-300 truncate">{{ store.annotationStats.latest.content }}</div>
+            <div class="text-xs text-gray-500 mt-1">
+              {{ store.formatTimeAgo(store.annotationStats.latest.createdAt) }}
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div v-if="store.currentDoc" class="space-y-1">
         <div v-for="a in store.currentDoc.annotations" :key="a.id"
           class="bg-gray-800 rounded p-2 text-xs flex justify-between">

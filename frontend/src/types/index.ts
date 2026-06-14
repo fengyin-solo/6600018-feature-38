@@ -21,6 +21,7 @@ export interface Annotation {
   bbox: [number, number, number, number]
   label: string
   content: string
+  createdAt: string
 }
 
 export interface VariantChar {
